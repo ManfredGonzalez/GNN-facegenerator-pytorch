@@ -25,7 +25,7 @@ data_loader = torch.utils.data.DataLoader(raFDDataset,
 
 num_epochs = 100
 learningRate = 1e-4
-use_cuda = False
+use_cuda = True
 
 model = Model().double()
 
@@ -36,7 +36,7 @@ optimizer = torch.optim.AdamW(model.parameters(), learningRate)
 
 for epoch in range(num_epochs):
     total_loss = 0
-    for batch in tqdm(data_loader,"Batch Processing"):
+    for batch in tqdm(data_loader,f'Epoch {epoch} processing'):
         
         orientations, identities, emotions, images = batch
         preds = []

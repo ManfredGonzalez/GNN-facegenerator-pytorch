@@ -23,6 +23,9 @@ class Model(nn.Module):
         self.upsamplig2D = nn.UpsamplingNearest2d(scale_factor=2)
         self.maxPool2D = nn.MaxPool2d([1,1])
         self.sigmoid = nn.Sigmoid()
+        self.batchnorm128 = nn.BatchNorm2d(128)
+        self.batchnorm96 = nn.BatchNorm2d(96)
+        self.batchnorm32 = nn.BatchNorm2d(32)
 
         self.fc1_id = nn.Linear(in_features=67, out_features=512) # for identity input
         self.fc1_ori = nn.Linear(in_features=2, out_features=512) # for orientation input
@@ -83,7 +86,7 @@ class Model(nn.Module):
         x = self.conv1_2(x)
         x = self.leaky_Relu(x)
 
-        x = nn.BatchNorm2d(128).double()(x)
+        x = self.batchnorm128(x)
         x = self.upsamplig2D(x)
 
         height, width = get_paddingSizes(x, self.conv2)
@@ -96,7 +99,7 @@ class Model(nn.Module):
         x = self.conv2_2(x)
         x = self.leaky_Relu(x)
 
-        x = nn.BatchNorm2d(128).double()(x)
+        x = self.batchnorm128(x)
         x = self.upsamplig2D(x)
 
         height, width = get_paddingSizes(x, self.conv3)
@@ -109,7 +112,7 @@ class Model(nn.Module):
         x = self.conv3_2(x)
         x = self.leaky_Relu(x)
 
-        x = nn.BatchNorm2d(96).double()(x)
+        x = self.batchnorm96(x)
         x = self.upsamplig2D(x)
 
         height, width = get_paddingSizes(x, self.conv4)
@@ -122,7 +125,7 @@ class Model(nn.Module):
         x = self.conv4_2(x)
         x = self.leaky_Relu(x)
 
-        x = nn.BatchNorm2d(96).double()(x)
+        x = self.batchnorm96(x)
         x = self.upsamplig2D(x)
 
         height, width = get_paddingSizes(x, self.conv5)
@@ -135,7 +138,7 @@ class Model(nn.Module):
         x = self.conv5_2(x)
         x = self.leaky_Relu(x)
 
-        x = nn.BatchNorm2d(32).double()(x)
+        x = self.batchnorm32(x)
         x = self.maxPool2D(x)
         x = self.upsamplig2D(x)
 
