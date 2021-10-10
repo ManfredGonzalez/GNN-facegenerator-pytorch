@@ -15,11 +15,6 @@ from model import Model
 
 device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
 
-
-model = Model().double()
-
-
-
 raFDDataset = RaFDDataset('/home/manfred/RafD_frontal_536',(256,320))
 
 # own DataLoader
@@ -30,6 +25,13 @@ data_loader = torch.utils.data.DataLoader(raFDDataset,
 
 num_epochs = 100
 learningRate = 1e-4
+use_cuda = False
+
+model = Model().double()
+
+if use_cuda:
+    model = model.cuda()
+
 optimizer = torch.optim.AdamW(model.parameters(), learningRate)
 
 for epoch in range(num_epochs):
@@ -43,6 +45,11 @@ for epoch in range(num_epochs):
             identity_input = identities[i].double()
             orientation_input = orientations[i].double()
             emotion_input = emotions[i].double()
+
+            if use_cuda:
+                identity_input.cuda()
+                orientation_input.cuda()
+                emotion_input.cuda()
 
             preds.append(model(identity_input,orientation_input,emotion_input))
         preds = torch.stack(preds)
