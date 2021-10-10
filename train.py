@@ -41,15 +41,16 @@ for epoch in range(num_epochs):
         orientations, identities, emotions, images = batch
         preds = []
         lossFunction = RMSLELoss()
+        images = images.cuda()
         for i in range(images.shape[0]):
             identity_input = identities[i].double()
             orientation_input = orientations[i].double()
             emotion_input = emotions[i].double()
 
             if use_cuda:
-                identity_input.cuda()
-                orientation_input.cuda()
-                emotion_input.cuda()
+                identity_input = identity_input.cuda()
+                orientation_input = orientation_input.cuda()
+                emotion_input = emotion_input.cuda()
 
             preds.append(model(identity_input,orientation_input,emotion_input))
         preds = torch.stack(preds)
