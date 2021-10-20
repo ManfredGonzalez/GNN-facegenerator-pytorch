@@ -16,13 +16,14 @@ def get_paddingSizes(x, layer):
 
 
 class Model(nn.Module):
-    def __init__(self):
+    def __init__(self,training = True):
         super(Model, self).__init__()
 
-        self.leaky_Relu = nn.LeakyReLU(negative_slope=0.3)
+        #self.leaky_Relu = nn.LeakyReLU(negative_slope=0.3)
+        self.training = training
         self.upsamplig2D = nn.UpsamplingNearest2d(scale_factor=2)
-        self.maxPool2D = nn.MaxPool2d([1,1])
-        self.sigmoid = nn.Sigmoid()
+        #self.maxPool2D = nn.MaxPool2d([1,1])
+        #self.sigmoid = nn.Sigmoid()
         self.batchnorm128 = nn.BatchNorm2d(128)
         self.batchnorm96 = nn.BatchNorm2d(96)
         self.batchnorm32 = nn.BatchNorm2d(32)
@@ -56,35 +57,34 @@ class Model(nn.Module):
     
     def forward(self,identity_input,orientation_input,emotion_input):
         identity_input = self.fc1_id(identity_input)
-        identity_input = self.leaky_Relu(identity_input)
+        identity_input = F.leaky_relu(identity_input, negative_slope=0.3)
 
         orientation_input = self.fc1_ori(orientation_input)
-        orientation_input = self.leaky_Relu(orientation_input)
+        orientation_input = F.leaky_relu(orientation_input, negative_slope=0.3)
 
         emotion_input = self.fc1_em(emotion_input)
-        emotion_input = self.leaky_Relu(emotion_input)
+        emotion_input = F.leaky_relu(emotion_input, negative_slope=0.3)
 
-        params = torch.cat((identity_input,orientation_input,emotion_input)).double()
+        params = torch.cat((identity_input,orientation_input,emotion_input),dim=1).double()
         params = self.fc2(params)
-        params = self.leaky_Relu(params)
+        params = F.leaky_relu(params, negative_slope=0.3)
 
         x = self.fc3(params)
-        x = self.leaky_Relu(x)
-        x = x.reshape(128,5,4)
+        x = F.leaky_relu(x, negative_slope=0.3)
+        x = x.reshape(-1,128,5,4)
 
-        x = torch.unsqueeze(x,0)
         ## I is not making the upasmpling in the 2Dimensions
         x = self.upsamplig2D(x)
 
         height, width = get_paddingSizes(x, self.conv1)
         x = F.pad(x,(width,width,height,height))
         x = self.conv1(x)
-        x = self.leaky_Relu(x)
+        x = F.leaky_relu(x, negative_slope=0.3)
 
         height, width = get_paddingSizes(x, self.conv1_2)
         x = F.pad(x,(width,width,height,height))
         x = self.conv1_2(x)
-        x = self.leaky_Relu(x)
+        x = F.leaky_relu(x, negative_slope=0.3)
 
         x = self.batchnorm128(x)
         x = self.upsamplig2D(x)
@@ -92,12 +92,12 @@ class Model(nn.Module):
         height, width = get_paddingSizes(x, self.conv2)
         x = F.pad(x,(width,width,height,height))
         x = self.conv2(x)
-        x = self.leaky_Relu(x)
+        x = F.leaky_relu(x, negative_slope=0.3)
 
         height, width = get_paddingSizes(x, self.conv2_2)
         x = F.pad(x,(width,width,height,height))
         x = self.conv2_2(x)
-        x = self.leaky_Relu(x)
+        x = F.leaky_relu(x, negative_slope=0.3)
 
         x = self.batchnorm128(x)
         x = self.upsamplig2D(x)
@@ -105,12 +105,12 @@ class Model(nn.Module):
         height, width = get_paddingSizes(x, self.conv3)
         x = F.pad(x,(width,width,height,height))
         x = self.conv3(x)
-        x = self.leaky_Relu(x)
+        x = F.leaky_relu(x, negative_slope=0.3)
 
         height, width = get_paddingSizes(x, self.conv3_2)
         x = F.pad(x,(width,width,height,height))
         x = self.conv3_2(x)
-        x = self.leaky_Relu(x)
+        x = F.leaky_relu(x, negative_slope=0.3)
 
         x = self.batchnorm96(x)
         x = self.upsamplig2D(x)
@@ -118,44 +118,44 @@ class Model(nn.Module):
         height, width = get_paddingSizes(x, self.conv4)
         x = F.pad(x,(width,width,height,height))
         x = self.conv4(x)
-        x = self.leaky_Relu(x)
+        x = F.leaky_relu(x, negative_slope=0.3)
 
         height, width = get_paddingSizes(x, self.conv4_2)
         x = F.pad(x,(width,width,height,height))
         x = self.conv4_2(x)
-        x = self.leaky_Relu(x)
+        x = F.leaky_relu(x, negative_slope=0.3)
 
-        x = self.batchnorm96(x)
+        x =self.batchnorm96(x)
         x = self.upsamplig2D(x)
 
         height, width = get_paddingSizes(x, self.conv5)
         x = F.pad(x,(width,width,height,height))
         x = self.conv5(x)
-        x = self.leaky_Relu(x)
+        x = F.leaky_relu(x, negative_slope=0.3)
 
         height, width = get_paddingSizes(x, self.conv5_2)
         x = F.pad(x,(width,width,height,height))
         x = self.conv5_2(x)
-        x = self.leaky_Relu(x)
+        x = F.leaky_relu(x, negative_slope=0.3)
 
         x = self.batchnorm32(x)
-        x = self.maxPool2D(x)
+        x = F.max_pool2d(x,kernel_size=1)
         x = self.upsamplig2D(x)
 
         height, width = get_paddingSizes(x, self.conv6)
         x = F.pad(x,(width,width,height,height))
         x = self.conv6(x)
-        x = self.leaky_Relu(x)
+        x = F.leaky_relu(x, negative_slope=0.3)
 
         height, width = get_paddingSizes(x, self.conv6_2)
         x = F.pad(x,(width,width,height,height))
         x = self.conv6_2(x)
-        x = self.leaky_Relu(x)
+        x = F.leaky_relu(x, negative_slope=0.3)
 
         height, width = get_paddingSizes(x, self.conv7)
         x = F.pad(x,(width,width,height,height))
         x = self.conv7(x)
-        x = self.sigmoid(x)
+        x = torch.sigmoid(x)
 
         x = torch.squeeze(x,0)
 

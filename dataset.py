@@ -89,8 +89,7 @@ class RaFDDataset(torch.utils.data.Dataset):
         identity_vec = np.zeros(len(self.identity_map), dtype=np.float32)
         identity_vec[ self.identity_map[identity_index] ] = 1.
 
-        
-        return torch.from_numpy(orientation),torch.from_numpy(identity_vec),torch.from_numpy(emotion),self.to_tensor(image)
+        return [torch.from_numpy(orientation).double(),torch.from_numpy(identity_vec).double(),torch.from_numpy(emotion).double()],self.to_tensor(image)
 
     def __len__(self):
         return self.num_instances
