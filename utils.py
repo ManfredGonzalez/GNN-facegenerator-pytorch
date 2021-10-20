@@ -28,3 +28,8 @@ class CustomDataParallel(nn.DataParallel):
                  inputs[2][splits * device_idx: splits * (device_idx + 1)].to(f'cuda:{device_idx}', non_blocking=True))
                 for device_idx in range(len(devices))], \
                [kwargs] * len(devices)
+
+def boolean_string(s):
+    if s not in {'False', 'True'}:
+        raise ValueError('Not a valid boolean string')
+    return s == 'True'

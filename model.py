@@ -7,6 +7,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim as optim
 from dataset import RaFDDataset
+import numpy as np
 
 def get_paddingSizes(x, layer):
     #supposing that the feature map has the shape (batch_size,channels,height,width)
@@ -16,11 +17,12 @@ def get_paddingSizes(x, layer):
 
 
 class Model(nn.Module):
-    def __init__(self,training = True):
+    def __init__(self,epsilon,sensitivity):
         super(Model, self).__init__()
 
         #self.leaky_Relu = nn.LeakyReLU(negative_slope=0.3)
-        self.training = training
+        self.epsilon = epsilon
+        self.sensitivity = sensitivity
         self.upsamplig2D = nn.UpsamplingNearest2d(scale_factor=2)
         #self.maxPool2D = nn.MaxPool2d([1,1])
         #self.sigmoid = nn.Sigmoid()
@@ -65,7 +67,14 @@ class Model(nn.Module):
         emotion_input = self.fc1_em(emotion_input)
         emotion_input = F.leaky_relu(emotion_input, negative_slope=0.3)
 
-        params = torch.cat((identity_input,orientation_input,emotion_input),dim=1).double()
+        
+        noise = torch.from_numpy(np.random.laplace(loc=0,scale=self.sensitivity/self.epsilon, size=(1, 512)))
+        noise = noise.to(identity_input.device)
+        
+
+        obfuscated_layer = identity_input + noise
+
+        params = torch.cat((obfuscated_layer,orientation_input,emotion_input),dim=1).double()
         params = self.fc2(params)
         params = F.leaky_relu(params, negative_slope=0.3)
 
