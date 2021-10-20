@@ -81,7 +81,8 @@ def train(opt):
     num_iter_per_epoch = len(data_loader)
     # if something wrong happens, catch and save the last weights
     writer = SummaryWriter(log_path + f'/{datetime.datetime.now().strftime("%Y%m%d-%H%M%S")}/')
-    scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, patience=2, verbose=True, factor=0.5, min_lr=1e-6)
+    if opt.lr_scheduler:
+        scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, patience=2, verbose=True, factor=0.5, min_lr=1e-6)
     try:
         for epoch in range(num_epochs):
             total_loss = 0
@@ -161,8 +162,8 @@ def train(opt):
             if epoch - best_epoch > es_patience > 0:
                 print('[Info] Stop training at epoch {}. The lowest loss achieved is {}'.format(epoch, best_loss))
                 break
-            
-            scheduler.step(np.mean(epoch_loss))
+            if opt.lr_scheduler:
+                scheduler.step(np.mean(epoch_loss))
     except KeyboardInterrupt:
             save_checkpoint(model, f'GNN_trained_weights_last.pth')
             writer.close()
@@ -197,6 +198,7 @@ def get_args():
     parser.add_argument('--use_cuda', type=boolean_string, default=True) 
     parser.add_argument('--epsilon', type=int, default=50)
     parser.add_argument('--sensitivity', type=int, default=1) 
+    parser.add_argument('--lr_scheduler', type=boolean_string, default=True)
 
     args = parser.parse_args()
     return args
