@@ -63,7 +63,7 @@ class RaFDDataset(torch.utils.data.Dataset):
         trim=24 
         top=24
         width = int(width-2*trim)
-        height = int(width*self.resize[0]/self.resize[1])
+        height = int(width*self.resize[1]/self.resize[0])
 
         image = image[trim+top:trim+height,trim:trim+width,:]
 
