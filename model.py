@@ -91,13 +91,12 @@ class Model(nn.Module):
         emotion_input = F.leaky_relu(emotion_input, negative_slope=0.3)
 
         if self.epsilon == 0:
+            params = torch.cat((identity_input,orientation_input,emotion_input),dim=1).double()
+        else:
             noise = torch.from_numpy(np.random.laplace(loc=0,scale=self.sensitivity/self.epsilon, size=(1, 512)))
             noise = noise.to(identity_input.device)
             obfuscated_layer = identity_input + noise
             params = torch.cat((obfuscated_layer,orientation_input,emotion_input),dim=1).double()
-        else:
-            params = torch.cat((identity_input,orientation_input,emotion_input),dim=1).double()
-        
         params = self.fc2(params)
         params = F.leaky_relu(params, negative_slope=0.3)
 
