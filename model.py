@@ -31,6 +31,8 @@ class Model(nn.Module):
         self.fc1_ori = nn.Linear(in_features=2, out_features=512) # for orientation input
         self.fc1_em = nn.Linear(in_features=8, out_features=512) # for emotion input
 
+        self.fc1_id_2 = nn.Linear(in_features=512, out_features=512) # for identity input
+
         self.fc2 = nn.Linear(in_features=1536, out_features=1024) # for the concatenated 3 inputs layer
         self.fc3 = nn.Linear(in_features=1024, out_features=5*4*128) # the final linear layer before the upsampling
         
@@ -74,8 +76,25 @@ class Model(nn.Module):
             nn.LeakyReLU(True),
             nn.BatchNorm2d(32)
         )
+        ##New layers
+        self.upconv6 = nn.Sequential(
+            nn.UpsamplingNearest2d(scale_factor=2),
+            nn.Conv2d(in_channels=32, out_channels=32, kernel_size=(5,5), padding='same'),
+            nn.LeakyReLU(True),
+            nn.Conv2d(in_channels=32, out_channels=32, kernel_size=(3,3), padding='same'),
+            nn.LeakyReLU(True),
+            nn.BatchNorm2d(32)
+        )
+        self.upconv7 = nn.Sequential(
+            nn.UpsamplingNearest2d(scale_factor=2),
+            nn.Conv2d(in_channels=32, out_channels=16, kernel_size=(5,5), padding='same'),
+            nn.LeakyReLU(True),
+            nn.Conv2d(in_channels=16, out_channels=16, kernel_size=(3,3), padding='same'),
+            nn.LeakyReLU(True),
+            nn.BatchNorm2d(16)
+        )
 
-        self.conv6 = nn.Conv2d(in_channels=32, out_channels=8, kernel_size=(5,5), padding='same')
+        self.conv6 = nn.Conv2d(in_channels=16, out_channels=8, kernel_size=(5,5), padding='same')
         self.conv6_2 = nn.Conv2d(in_channels=8, out_channels=8, kernel_size=(3,3), padding='same')
 
         self.conv7 = nn.Conv2d(in_channels=8, out_channels=3, kernel_size=(3,3), padding='same')
@@ -90,13 +109,38 @@ class Model(nn.Module):
         emotion_input = self.fc1_em(emotion_input)
         emotion_input = F.leaky_relu(emotion_input, negative_slope=0.3)
 
+        
+
         if self.epsilon == 0:
+            identity_input = self.fc1_id_2(identity_input)
             params = torch.cat((identity_input,orientation_input,emotion_input),dim=1).double()
         else:
-            noise = torch.from_numpy(np.random.laplace(loc=0,scale=self.sensitivity/self.epsilon, size=(1, 512)))
+            n = identity_input.size(dim=1)
+            if torch.max(identity_input).item() < 1 and torch.max(identity_input).item() > 0: 
+                imax = torch.max(identity_input).item() 
+            elif torch.max(identity_input).item()> 1: 
+                imax = 1
+            else:
+                imax = 0
+            
+            if torch.min(identity_input).item()< 1 and torch.min(identity_input).item() > 0: 
+                imin = torch.min(identity_input).item() 
+            elif torch.min(identity_input).item() < 0: 
+                imin = 0
+            else:
+                imin = 1
+
+            
+
+            scale_parameter = (((n*(imax-imin))/self.epsilon))
+            noise = torch.from_numpy(np.random.laplace(loc=0,scale=scale_parameter, size=(1, n)))
             noise = noise.to(identity_input.device)
-            obfuscated_layer = identity_input + noise
-            params = torch.cat((obfuscated_layer,orientation_input,emotion_input),dim=1).double()
+
+            obfuscated_input = identity_input + noise
+
+            identity_input = self.fc1_id_2(obfuscated_input)
+
+        params = torch.cat((identity_input,orientation_input,emotion_input),dim=1).double()
         params = self.fc2(params)
         params = F.leaky_relu(params, negative_slope=0.3)
 
@@ -109,6 +153,8 @@ class Model(nn.Module):
         x = self.upconv3(x)
         x = self.upconv4(x)
         x = self.upconv5(x)
+        x = self.upconv6(x)
+        x = self.upconv7(x)
 
         
         x = F.max_pool2d(x,kernel_size=1)

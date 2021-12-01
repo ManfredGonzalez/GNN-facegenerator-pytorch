@@ -12,10 +12,19 @@
             "console": "integratedTerminal",
             "env": { "CUDA_VISIBLE_DEVICES": "0"}, 
             
-            "args": ["--p", "fifth_test",
+            /*"args": ["--p", "50_paper_b_12_7_uplayers",
                     "--batch_size", "12",
                     "--data_path", "E:/datosmanfred/Slovennian_research/RafD_frontal_536",
-                    "--epsilon", "50"]
+                    "--epsilon", "50",
+                    "--num_epochs", "1000",
+                    "--lr_scheduler", "True",
+                    "--load_weights", "C:/Users/becadoprias/Desktop/GNN-facegenerator/GNN-facegenerator-pytorch/logs/50_paper_b_12/best_weights.pth"]*/
+            "args": ["--p", "100_paper_b_4_7_uplayers",
+                    "--batch_size", "4",
+                    "--data_path", "E:/datosmanfred/Slovennian_research/RafD_frontal_536",
+                    "--epsilon", "100",
+                    "--num_epochs", "1000",
+                    "--lr_scheduler", "False"]
         }
     ]
 }

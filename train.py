@@ -1,7 +1,6 @@
 import argparse
 import yaml
 from typing import ForwardRef
-from numpy.core.numeric import identity
 import torch
 import torchvision
 import torchvision.transforms as transforms
@@ -11,6 +10,7 @@ import torch.optim as optim
 from dataset import RaFDDataset
 import numpy as np
 from MSLELoss import RMSLELoss
+from norm_distance_metric import Distance_metric
 from tqdm import tqdm
 from tensorboardX import SummaryWriter
 import datetime
@@ -19,7 +19,12 @@ from model import Model
 from utils import CustomDataParallel,boolean_string
 import traceback
 import os
+import cv2
 
+reverse_preprocess = transforms.Compose([
+            transforms.ToPILImage(),
+            np.array,
+        ])
 def save_checkpoint(model, name,saved_path):
     '''
     Save current weights of the model.
@@ -50,7 +55,7 @@ def train(opt):
     es_patience = opt.es_patience
     es_min_delta = opt.es_min_delta
 
-    raFDDataset = RaFDDataset(opt.data_path,(256,320))
+    raFDDataset = RaFDDataset(opt.data_path,(1024,1280))
     #raFDDataset = RaFDDataset('E:/datosmanfred/Slovennian_research/RafD_frontal_536',(256,320))
 
     # own DataLoader
@@ -71,6 +76,16 @@ def train(opt):
     os.makedirs(saved_path, exist_ok=True)
     model = Model(opt.epsilon, opt.sensitivity).double()
 
+    if opt.load_weights is not None:
+        weights_path = opt.load_weights
+
+        try:
+            ret = model.load_state_dict(torch.load(weights_path), strict=False)
+        except RuntimeError as e:
+            print(f'[Warning] Ignoring {e}')
+            print(
+                '[Warning] Don\'t panic if you see this, this might be because you load a pretrained weights with different number of classes. The rest of the weights should be loaded already.')
+
     if use_cuda:
         model = model.cuda()
 
@@ -82,7 +97,11 @@ def train(opt):
     # if something wrong happens, catch and save the last weights
     writer = SummaryWriter(log_path + f'/{datetime.datetime.now().strftime("%Y%m%d-%H%M%S")}/')
     if opt.lr_scheduler:
-        scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, patience=2, verbose=True, factor=0.5, min_lr=1e-6)
+        scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, patience=6, verbose=True, factor=0.5, min_lr=1e-6)
+    
+    imax=1
+    imin=0
+    preds = []
     try:
         for epoch in range(num_epochs):
             total_loss = 0
@@ -97,8 +116,10 @@ def train(opt):
                     continue
                 try:
                     input_data, images = batch
-                    preds = []
+                    n = torch.flatten(images).size(dim=0)
+                    
                     lossFunction = RMSLELoss()
+                    #lossFunction = Distance_metric()
                     #lossFunction = nn.MSELoss()
                     if use_cuda:
                         identities = input_data[1].cuda()
@@ -156,8 +177,10 @@ def train(opt):
                 best_loss = loss
                 best_epoch = epoch
                 save_checkpoint(model, f'best_weights.pth',saved_path)
+                cv2.imwrite(os.path.join(saved_path,'best.jpg'),reverse_preprocess(preds[0].cpu().detach()))
                 with open(os.path.join(saved_path, f"best_weights.txt"), "a") as my_file: 
                     my_file.write(f"Epoch:{epoch} / Step: {step} / Loss: {best_loss}\n") 
+            cv2.imwrite(os.path.join(saved_path,'last.jpg'),reverse_preprocess(preds[0].cpu().detach()))
 
             if epoch - best_epoch > es_patience > 0:
                 print('[Info] Stop training at epoch {}. The lowest loss achieved is {}'.format(epoch, best_loss))
@@ -192,7 +215,7 @@ def get_args():
     parser.add_argument('--es_patience', type=int, default=0) # Early stopping\'s parameter: number of epochs with no improvement after which training will be stopped. Set to 0 to disable this technique.
     parser.add_argument('--data_path', type=str, default='datasets/') # the root folder of dataset
     parser.add_argument('--log_path', type=str, default='logs/')
-    #parser.add_argument('-w', '--load_weights', type=str, default=None) # whether to load weights from a checkpoint, set None to initialize, set last to load last checkpoint
+    parser.add_argument('-w', '--load_weights', type=str, default=None) # whether to load weights from a checkpoint, set None to initialize, set last to load last checkpoint
     parser.add_argument('--saved_path', type=str, default='logs/')
     parser.add_argument('--shuffle_ds', type=boolean_string, default=True)
     parser.add_argument('--use_cuda', type=boolean_string, default=True) 
