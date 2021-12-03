@@ -9,10 +9,10 @@ from tqdm import tqdm
 def make_gen():
 
     
-    weights_path = 'logs/500_paper_b_12/best_weights.pth'
+    weights_path = 'logs/50_paper_b_12_7_uplayers/best_weights.pth'
     use_cuda = False
     
-    gen = Model(epsilon=500,sensitivity=1).double()
+    gen = Model(epsilon=50,sensitivity=1).double()
     gen.load_state_dict(torch.load(weights_path,map_location=torch.device('cpu')))
     gen.requires_grad_(False)
     gen.eval()
@@ -55,7 +55,7 @@ def net_rafd(gen,image_name,identity_map):
         identity.cuda()
         emotion.cuda()
         orientation.cuda()
-    image = gen(identity,orientation,emotion)
+    image = torch.squeeze(gen(identity,orientation,emotion))
 
     return image
 

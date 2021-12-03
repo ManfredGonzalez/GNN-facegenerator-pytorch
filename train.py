@@ -10,6 +10,7 @@ import torch.optim as optim
 from dataset import RaFDDataset
 import numpy as np
 from MSLELoss import MSLELoss
+from RMSLELoss import RMSLELoss
 from norm_distance_metric import Distance_metric
 from tqdm import tqdm
 from tensorboardX import SummaryWriter
@@ -119,9 +120,8 @@ def train(opt):
                     input_data, images = batch
                     n = torch.flatten(images).size(dim=0)
                     
-                    lossFunction = MSLELoss()
-                    #lossFunction = Distance_metric()
-                    #lossFunction = nn.MSELoss()
+                    #lossFunction = MSLELoss()
+                    lossFunction = RMSLELoss()
                     if use_cuda:
                         identities = input_data[1].cuda()
                         orientations = input_data[0].cuda()
