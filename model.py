@@ -85,16 +85,16 @@ class Model(nn.Module):
             nn.LeakyReLU(True),
             nn.BatchNorm2d(32)
         )
-        self.upconv7 = nn.Sequential(
+        '''self.upconv7 = nn.Sequential(
             nn.UpsamplingNearest2d(scale_factor=2),
             nn.Conv2d(in_channels=32, out_channels=16, kernel_size=(5,5), padding='same'),
             nn.LeakyReLU(True),
             nn.Conv2d(in_channels=16, out_channels=16, kernel_size=(3,3), padding='same'),
             nn.LeakyReLU(True),
             nn.BatchNorm2d(16)
-        )
+        )'''
 
-        self.conv6 = nn.Conv2d(in_channels=16, out_channels=8, kernel_size=(5,5), padding='same')
+        self.conv6 = nn.Conv2d(in_channels=32, out_channels=8, kernel_size=(5,5), padding='same')
         self.conv6_2 = nn.Conv2d(in_channels=8, out_channels=8, kernel_size=(3,3), padding='same')
 
         self.conv7 = nn.Conv2d(in_channels=8, out_channels=3, kernel_size=(3,3), padding='same')
@@ -154,7 +154,7 @@ class Model(nn.Module):
         x = self.upconv4(x)
         x = self.upconv5(x)
         x = self.upconv6(x)
-        x = self.upconv7(x)
+        #x = self.upconv7(x)
 
         
         x = F.max_pool2d(x,kernel_size=1)
@@ -169,7 +169,5 @@ class Model(nn.Module):
         
         x = self.conv7(x)
         x = torch.sigmoid(x)
-
-        x = torch.squeeze(x,0)
 
         return x

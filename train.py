@@ -55,7 +55,8 @@ def train(opt):
     es_patience = opt.es_patience
     es_min_delta = opt.es_min_delta
 
-    raFDDataset = RaFDDataset(opt.data_path,(1024,1280))
+    #raFDDataset = RaFDDataset(opt.data_path,(1024,1280))
+    raFDDataset = RaFDDataset(opt.data_path,(512,640))
     #raFDDataset = RaFDDataset('E:/datosmanfred/Slovennian_research/RafD_frontal_536',(256,320))
 
     # own DataLoader
