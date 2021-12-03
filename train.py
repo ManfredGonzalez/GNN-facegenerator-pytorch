@@ -120,8 +120,15 @@ def train(opt):
                     input_data, images = batch
                     n = torch.flatten(images).size(dim=0)
                     
-                    #lossFunction = MSLELoss()
-                    lossFunction = RMSLELoss()
+                    if opt.loss_function == 'msle':
+                        lossFunction = MSLELoss()
+                    elif opt.loss_function == 'rmsle':
+                        lossFunction = RMSLELoss()
+                    elif opt.loss_function == 'mse':
+                        lossFunction = nn.MSELoss()
+                    else:
+                        lossFunction = MSLELoss()
+                    
                     if use_cuda:
                         identities = input_data[1].cuda()
                         orientations = input_data[0].cuda()
@@ -223,6 +230,7 @@ def get_args():
     parser.add_argument('--epsilon', type=int, default=50)
     parser.add_argument('--sensitivity', type=int, default=1) 
     parser.add_argument('--lr_scheduler', type=boolean_string, default=True)
+    parser.add_argument('--loss_function', type=str, default='msle')
 
     args = parser.parse_args()
     return args
