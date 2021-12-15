@@ -121,7 +121,7 @@ class Model(nn.Module):
             
 
             scale_parameter = (((n*(imax-imin))/self.epsilon))
-            noise = torch.from_numpy(np.random.laplace(loc=1,scale=scale_parameter, size=(1, n)))
+            noise = torch.from_numpy(np.random.laplace(loc=0,scale=scale_parameter, size=(1, n)))
             
             noise = noise.to(identity_input.device)
             #snap any out-of-bounds noisy value back to the nearest valid value
