@@ -17,7 +17,6 @@ def get_paddingSizes(x, layer):
     height = int((((x.shape[2]-1)-(x.shape[2]-layer.kernel_size[0]))*(1 / layer.stride[0]))/2)
     return height, width
 
-
 class Model(nn.Module):
     def __init__(self,epsilon=0,sensitivity=1):
         super(Model, self).__init__()
@@ -116,25 +115,20 @@ class Model(nn.Module):
             params = torch.cat((identity_input,orientation_input,emotion_input),dim=1).double()
         else:
             n = identity_input.size(dim=1)
-            if torch.max(identity_input).item() < 1 and torch.max(identity_input).item() > 0: 
-                imax = torch.max(identity_input).item() 
-            elif torch.max(identity_input).item()> 1: 
-                imax = 1
-            else:
-                imax = 0
-            
-            if torch.min(identity_input).item()< 1 and torch.min(identity_input).item() > 0: 
-                imin = torch.min(identity_input).item() 
-            elif torch.min(identity_input).item() < 0: 
-                imin = 0
-            else:
-                imin = 1
+            imax = torch.max(identity_input[identity_input < 1]).item()
+            imin = torch.min(identity_input[identity_input > 0]).item()
 
             
 
             scale_parameter = (((n*(imax-imin))/self.epsilon))
-            noise = torch.from_numpy(np.random.laplace(loc=0,scale=scale_parameter, size=(1, n)))
+            noise = torch.from_numpy(np.random.laplace(loc=1,scale=scale_parameter, size=(1, n)))
+            
             noise = noise.to(identity_input.device)
+            #snap any out-of-bounds noisy value back to the nearest valid value
+            #noise_min = torch.min(noise[noise > 0]).item()
+            #noise_max = torch.max(noise[noise < 1]).item()
+            noise[noise > 1] = imax
+            noise[noise < 0] = imin
 
             obfuscated_input = identity_input + noise
 

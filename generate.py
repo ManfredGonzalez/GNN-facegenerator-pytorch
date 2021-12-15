@@ -262,7 +262,7 @@ class GenParser:
         Parses the yaml file and creates input vectors to use with the model.
         """
 
-        self.yaml_file.seek(0)
+        #self.yaml_file.seek(0)
 
         yaml_params = yaml.load(self.yaml_file)
 
@@ -303,13 +303,13 @@ def normalize(x, lower, upper):
     x_norm = (m * (x - x_min)) + lower
 
     return x_norm
-def generate_from_yaml(yaml_path, weights_path, output_dir,use_cuda=True,
+def generate_from_yaml(yaml_path, weights_path, output_dir,epsilon,use_cuda=True,
         extension='jpg'):
     """
     Generate images based on parameters specified in a yaml file.
     """
 
-    model = Model().double()
+    model = Model(epsilon=epsilon,sensitivity=1).double()
     model.load_state_dict(torch.load(weights_path,map_location=torch.device('cpu')))
     model.requires_grad_(False)
     model.eval()
@@ -352,4 +352,4 @@ def generate_from_yaml(yaml_path, weights_path, output_dir,use_cuda=True,
     #image = np.array(255*np.clip(image,0,1), dtype=np.uint8)
     print(cv2.imwrite(f'{output_dir}/{emotion_name}_{id}.{extension}', image))
 
-generate_from_yaml('C:/Users/becadoprias/Desktop/GNN-facegenerator/GNN-facegenerator-pytorch/single.yaml', 'E:/datosmanfred/Slovennian_research/GNN-weights/fourth_NO_lr_scheduler/last_weights.pth', 'E:/datosmanfred/Slovennian_research/GNN-weights/tests')
+generate_from_yaml('C:/Users/becadoprias/Desktop/GNN-facegenerator/GNN-facegenerator-pytorch/single.yaml', 'logs/50_without_sensitivity/best_weights.pth', 'E:/datosmanfred/Slovennian_research/GNN-weights/tests',10)
