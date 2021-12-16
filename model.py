@@ -125,10 +125,13 @@ class Model(nn.Module):
             
             noise = noise.to(identity_input.device)
             #snap any out-of-bounds noisy value back to the nearest valid value
-            #noise_min = torch.min(noise[noise > 0]).item()
-            #noise_max = torch.max(noise[noise < 1]).item()
-            noise[noise > 1] = imax
-            noise[noise < 0] = imin
+            noise_min = torch.min(noise[noise > 0]).item()
+            noise_max = torch.max(noise[noise < 1]).item()
+            noise[noise > 1] = noise_max
+            noise[noise < 0] = noise_min
+
+            #noise[noise > 1] = imax
+            #noise[noise < 0] = imin
 
             obfuscated_input = identity_input + noise
 

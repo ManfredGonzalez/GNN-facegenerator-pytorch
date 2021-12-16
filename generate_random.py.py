@@ -10,10 +10,10 @@ def make_gen():
 
     
     #weights_path = 'logs/250_paper_b_20_6_uplayers_lr4_4000/best_weights.pth'
-    weights_path = 'logs/0_paper_b_20_6_uplayers_lr3/best_weights.pth'
+    weights_path = 'logs/50_paper_b_20_6_uplayers_lr4_2000/best_weights.pth'
     use_cuda = False
     
-    gen = Model(epsilon=0,sensitivity=1).double()
+    gen = Model(epsilon=50,sensitivity=1).double()
     gen.load_state_dict(torch.load(weights_path,map_location=torch.device('cpu')))
     gen.requires_grad_(False)
     gen.eval()
