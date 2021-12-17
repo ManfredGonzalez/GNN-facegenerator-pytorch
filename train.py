@@ -76,7 +76,7 @@ def train(opt):
     saved_path = f'{saved_path}{project}'
     os.makedirs(log_path, exist_ok=True)
     os.makedirs(saved_path, exist_ok=True)
-    model = Model(opt.epsilon, opt.sensitivity).double()
+    model = Model(opt.epsilon, opt.sensitivity, loc_laplace=opt.loc_laplace).double()
 
     if opt.load_weights is not None:
         weights_path = opt.load_weights
@@ -231,6 +231,7 @@ def get_args():
     parser.add_argument('--sensitivity', type=int, default=1) 
     parser.add_argument('--lr_scheduler', type=boolean_string, default=True)
     parser.add_argument('--loss_function', type=str, default='msle')
+    parser.add_argument('--loc_laplace', type=int, default=0)
 
     args = parser.parse_args()
     return args

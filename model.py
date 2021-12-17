@@ -18,12 +18,13 @@ def get_paddingSizes(x, layer):
     return height, width
 
 class Model(nn.Module):
-    def __init__(self,epsilon=0,sensitivity=1):
+    def __init__(self,epsilon=0,sensitivity=1,loc_laplace=0):
         super(Model, self).__init__()
 
         #self.leaky_Relu = nn.LeakyReLU(negative_slope=0.3)
         self.epsilon = epsilon
         self.sensitivity = sensitivity
+        self.loc_laplace = loc_laplace
         self.upsamplig2D = nn.UpsamplingNearest2d(scale_factor=2)
 
         self.fc1_id = nn.Linear(in_features=67, out_features=512) # for identity input
@@ -125,7 +126,7 @@ class Model(nn.Module):
             
 
             scale_parameter = (((n*(imax-imin))/self.epsilon))
-            noise = torch.from_numpy(np.random.laplace(loc=1,scale=scale_parameter, size=(1, n)))
+            noise = torch.from_numpy(np.random.laplace(loc=self.loc_laplace,scale=scale_parameter, size=(1, n)))
             
             noise = noise.to(identity_input.device)
             #snap any out-of-bounds noisy value back to the nearest valid value

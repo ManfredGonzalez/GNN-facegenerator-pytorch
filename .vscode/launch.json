@@ -24,7 +24,8 @@
                     "--data_path", "E:/datosmanfred/Slovennian_research/RafD_frontal_536",
                     "--epsilon", "50",
                     "--num_epochs", "1000",
-                    "--lr_scheduler", "False"]
+                    "--lr_scheduler", "False",
+                    "--loc_laplace", "1"]
         }
     ]
 }
