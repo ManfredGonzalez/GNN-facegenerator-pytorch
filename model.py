@@ -115,21 +115,32 @@ class Model(nn.Module):
             params = torch.cat((identity_input,orientation_input,emotion_input),dim=1).double()
         else:
             n = identity_input.size(dim=1)
-            imax = torch.max(identity_input[identity_input < 1]).item()
-            imin = torch.min(identity_input[identity_input > 0]).item()
+            ## Way 1
+            #imax = torch.max(identity_input[identity_input < 1]).item()
+            #imin = torch.min(identity_input[identity_input > 0]).item()
+            ## Way 2
+            imax = torch.max(identity_input).item()
+            imin = torch.min(identity_input).item()
 
             
 
             scale_parameter = (((n*(imax-imin))/self.epsilon))
-            noise = torch.from_numpy(np.random.laplace(loc=0,scale=scale_parameter, size=(1, n)))
+            noise = torch.from_numpy(np.random.laplace(loc=1,scale=scale_parameter, size=(1, n)))
             
             noise = noise.to(identity_input.device)
             #snap any out-of-bounds noisy value back to the nearest valid value
-            noise_min = torch.min(noise[noise > 0]).item()
-            noise_max = torch.max(noise[noise < 1]).item()
-            noise[noise > 1] = noise_max
-            noise[noise < 0] = noise_min
-
+            ## Way 1
+            #noise_min = torch.min(noise[noise > 0]).item()
+            #noise_max = torch.max(noise[noise < 1]).item()
+            #noise[noise > 1] = noise_max
+            #noise[noise < 0] = noise_min
+            ## Way 2
+            #m1 = noise[noise > imax].size(0) 
+            #min2 = noise[noise < imin].size(0) 
+            noise_min = torch.min(noise[noise > imin]).item()
+            noise_max = torch.max(noise[noise < imax]).item()
+            noise[noise > imax] = noise_max
+            noise[noise < imin] = noise_min
             #noise[noise > 1] = imax
             #noise[noise < 0] = imin
 
