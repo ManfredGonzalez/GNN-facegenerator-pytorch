@@ -19,8 +19,8 @@
                     "--num_epochs", "1000",
                     "--lr_scheduler", "True",
                     "--load_weights", "C:/Users/becadoprias/Desktop/GNN-facegenerator/GNN-facegenerator-pytorch/logs/50_paper_b_12/best_weights.pth"]*/
-            "args": ["--p", "50_paper_b_4_7_uplayers_test",
-                    "--batch_size", "4",
+            "args": ["--p", "50_paper_b_12_6_uplayers_TEST",
+                    "--batch_size", "12",
                     "--data_path", "E:/datosmanfred/Slovennian_research/RafD_frontal_536",
                     "--epsilon", "50",
                     "--num_epochs", "1000",

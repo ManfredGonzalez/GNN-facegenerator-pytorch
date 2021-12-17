@@ -10,7 +10,7 @@ def make_gen():
 
     
     #weights_path = 'logs/250_paper_b_20_6_uplayers_lr4_4000/best_weights.pth'
-    weights_path = 'logs/50_paper_b_20_6_uplayers_lr4_1000/last_weights.pth'
+    weights_path = 'logs/50_paper_b_20_6_uplayers_lr4_1000_loc0/last_weights.pth'
     use_cuda = False
     
     gen = Model(epsilon=50,sensitivity=1).double()

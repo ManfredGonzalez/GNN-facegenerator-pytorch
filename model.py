@@ -126,7 +126,8 @@ class Model(nn.Module):
             
 
             scale_parameter = (((n*(imax-imin))/self.epsilon))
-            noise = torch.from_numpy(np.random.laplace(loc=self.loc_laplace,scale=scale_parameter, size=(1, n)))
+            location = (imax+imin)/2
+            noise = torch.from_numpy(np.random.laplace(loc=location,scale=scale_parameter, size=(1, n)))
             
             noise = noise.to(identity_input.device)
             #snap any out-of-bounds noisy value back to the nearest valid value
@@ -140,8 +141,8 @@ class Model(nn.Module):
             #min2 = noise[noise < imin].size(0) 
             noise_min = torch.min(noise[noise > imin]).item()
             noise_max = torch.max(noise[noise < imax]).item()
-            noise[noise > imax] = noise_max
-            noise[noise < imin] = noise_min
+            noise[noise > noise_max] = noise_max
+            noise[noise < noise_min] = noise_min
             #noise[noise > 1] = imax
             #noise[noise < 0] = imin
 
