@@ -10,6 +10,7 @@ import torch.nn.functional as F
 import torch.optim as optim
 from dataset import RaFDDataset
 import numpy as np
+import math
 
 def get_paddingSizes(x, layer):
     #supposing that the feature map has the shape (batch_size,channels,height,width)
@@ -126,27 +127,22 @@ class Model(nn.Module):
             
 
             scale_parameter = (((n*(imax-imin))/self.epsilon))
-            location = (imax+imin)/2
-            noise = torch.from_numpy(np.random.laplace(loc=location,scale=scale_parameter, size=(1, n)))
+            sensitivity = math.exp(self.epsilon)
+            noise = torch.from_numpy(np.random.laplace(loc=sensitivity,scale=scale_parameter, size=(1, n)))
             
             noise = noise.to(identity_input.device)
             #snap any out-of-bounds noisy value back to the nearest valid value
-            ## Way 1
-            #noise_min = torch.min(noise[noise > 0]).item()
-            #noise_max = torch.max(noise[noise < 1]).item()
-            #noise[noise > 1] = noise_max
-            #noise[noise < 0] = noise_min
             ## Way 2
-            #m1 = noise[noise > imax].size(0) 
-            #min2 = noise[noise < imin].size(0) 
-            noise_min = torch.min(noise[noise > imin]).item()
-            noise_max = torch.max(noise[noise < imax]).item()
-            noise[noise > noise_max] = noise_max
-            noise[noise < noise_min] = noise_min
-            #noise[noise > 1] = imax
-            #noise[noise < 0] = imin
+            out_of_upper_limit = noise[noise > imax]
+            out_of_lower_limit = noise[noise < imin]
+            if out_of_upper_limit.size(0) != 0:
+                noise_max = torch.max(out_of_upper_limit).item()
+                noise[noise > noise_max] = noise_max
+            if out_of_lower_limit.size(0) != 0:
+                noise_min = torch.min(out_of_lower_limit).item()
+                noise[noise < noise_min] = noise_min
 
-            obfuscated_input = identity_input + noise
+            obfuscated_input = identity_input + noise ##Adding the noise values to ther features
 
             identity_input = self.fc1_id_2(obfuscated_input)
 
