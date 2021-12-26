@@ -12,20 +12,19 @@
             "console": "integratedTerminal",
             "env": { "CUDA_VISIBLE_DEVICES": "0"}, 
             
-            "args": ["--p", "50_b_16_5_uplayers",
-                    "--batch_size", "20",
-                    "--data_path", "E:/datosmanfred/Slovennian_research/RafD_frontal_536",
-                    "--epsilon", "50",
-                    "--num_epochs", "1000",
-                    "--lr_scheduler", "True",
-                    "--load_weights", "C:/Users/becadoprias/Desktop/GNN-facegenerator/GNN-facegenerator-pytorch/logs/50_b_16_5_uplayers/last_weights.pth"]
             /*"args": ["--p", "50_b_16_5_uplayers",
                     "--batch_size", "20",
                     "--data_path", "E:/datosmanfred/Slovennian_research/RafD_frontal_536",
                     "--epsilon", "50",
                     "--num_epochs", "1000",
-                    "--lr_scheduler", "False",
-                    "--loc_laplace", "1"]*/
+                    "--lr_scheduler", "True",
+                    "--load_weights", "C:/Users/becadoprias/Desktop/GNN-facegenerator/GNN-facegenerator-pytorch/logs/50_b_16_5_uplayers/last_weights.pth"]*/
+            "args": ["--p", "TEST_1",
+                    "--batch_size", "8",
+                    "--data_path", "E:/datosmanfred/Slovennian_research/RafD_frontal_536",
+                    "--epsilon", "50",
+                    "--num_epochs", "1000",
+                    "--lr_scheduler", "False"]
         }
     ]
 }
