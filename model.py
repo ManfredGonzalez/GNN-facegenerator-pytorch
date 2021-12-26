@@ -78,14 +78,14 @@ class Model(nn.Module):
             nn.BatchNorm2d(32)
         )
         ##New layers
-        self.upconv6 = nn.Sequential(
+        '''self.upconv6 = nn.Sequential(
             nn.UpsamplingNearest2d(scale_factor=2),
             nn.Conv2d(in_channels=32, out_channels=32, kernel_size=(5,5), padding='same'),
             nn.LeakyReLU(True),
             nn.Conv2d(in_channels=32, out_channels=32, kernel_size=(3,3), padding='same'),
             nn.LeakyReLU(True),
             nn.BatchNorm2d(32)
-        )
+        )'''
         '''self.upconv7 = nn.Sequential(
             nn.UpsamplingNearest2d(scale_factor=2),
             nn.Conv2d(in_channels=32, out_channels=16, kernel_size=(5,5), padding='same'),
@@ -128,18 +128,19 @@ class Model(nn.Module):
 
             scale_parameter = (((n*(imax-imin))/self.epsilon))
             sensitivity = math.exp(self.epsilon)
-            noise = torch.from_numpy(np.random.laplace(loc=sensitivity,scale=scale_parameter, size=(1, n)))
+            value = sensitivity/scale_parameter
+            noise = torch.from_numpy(np.random.laplace(loc=0,scale=value, size=(1, n)))
             
             noise = noise.to(identity_input.device)
             #snap any out-of-bounds noisy value back to the nearest valid value
             ## Way 2
-            out_of_upper_limit = noise[noise > imax]
-            out_of_lower_limit = noise[noise < imin]
-            if out_of_upper_limit.size(0) != 0:
-                noise_max = torch.max(out_of_upper_limit).item()
+            valid_of_upper_limit = noise[noise > imax]
+            valid_of_lower_limit = noise[noise < imin]
+            if valid_of_upper_limit.size(0) != 0:
+                noise_max = torch.max(valid_of_upper_limit).item()
                 noise[noise > noise_max] = noise_max
-            if out_of_lower_limit.size(0) != 0:
-                noise_min = torch.min(out_of_lower_limit).item()
+            if valid_of_lower_limit.size(0) != 0:
+                noise_min = torch.min(valid_of_lower_limit).item()
                 noise[noise < noise_min] = noise_min
 
             obfuscated_input = identity_input + noise ##Adding the noise values to ther features
@@ -159,7 +160,7 @@ class Model(nn.Module):
         x = self.upconv3(x)
         x = self.upconv4(x)
         x = self.upconv5(x)
-        x = self.upconv6(x)
+        #x = self.upconv6(x)
         #x = self.upconv7(x)
 
         

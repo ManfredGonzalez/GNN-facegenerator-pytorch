@@ -57,7 +57,8 @@ def train(opt):
     es_min_delta = opt.es_min_delta
 
     #raFDDataset = RaFDDataset(opt.data_path,(1024,1280))
-    raFDDataset = RaFDDataset(opt.data_path,(512,640))
+    #raFDDataset = RaFDDataset(opt.data_path,(512,640))
+    raFDDataset = RaFDDataset(opt.data_path,(256,320))
     #raFDDataset = RaFDDataset('E:/datosmanfred/Slovennian_research/RafD_frontal_536',(256,320))
 
     # own DataLoader
@@ -99,7 +100,7 @@ def train(opt):
     # if something wrong happens, catch and save the last weights
     writer = SummaryWriter(log_path + f'/{datetime.datetime.now().strftime("%Y%m%d-%H%M%S")}/')
     if opt.lr_scheduler:
-        scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, patience=6, verbose=True, factor=0.5, min_lr=1e-6)
+        scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, patience=10, verbose=True, factor=0.5, min_lr=1e-6)
     
     imax=1
     imin=0
