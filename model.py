@@ -130,8 +130,7 @@ class Model(nn.Module):
             #sensitivity = np.exp(self.epsilon)
             sensitivity = 1
             value = sensitivity/scale_parameter
-            #noise = torch.from_numpy(np.random.laplace(loc=0,scale=value, size=(1, n)))
-            noise = torch.from_numpy(np.random.laplace(loc=0,scale=scale_parameter, size=(1, n)))
+            noise = torch.from_numpy(np.random.laplace(loc=0,scale=value, size=(1, n)))
             noise = noise.to(identity_input.device)
             #snap any out-of-bounds noisy value back to the nearest valid value
             valid_noise = noise[noise < imax]
