@@ -125,7 +125,7 @@ class Model(nn.Module):
             
 
             scale_parameter = (((n*(imax-imin))/self.epsilon))
-            location = torch.mean(identity_input).item()
+            location = torch.mean(identity_input,1,keepdim=True)
             #noise = torch.from_numpy(np.random.laplace(loc=location,scale=scale_parameter, size=(identity_input.size(dim=0), n)))
 
             noise = torch.exp(-abs(identity_input-location)/scale_parameter)/(2.*scale_parameter)
