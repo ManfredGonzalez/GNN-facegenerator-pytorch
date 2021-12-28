@@ -126,17 +126,20 @@ class Model(nn.Module):
 
             scale_parameter = (((n*(imax-imin))/self.epsilon))
             location = torch.mean(identity_input).item()
-            noise = torch.from_numpy(np.random.laplace(loc=location,scale=scale_parameter, size=(1, n)))
+            #noise = torch.from_numpy(np.random.laplace(loc=location,scale=scale_parameter, size=(1, n)))
+
+            noise = torch.exp(-abs(identity_input-location)/scale_parameter)/(2.*scale_parameter)
+
             noise = noise.to(identity_input.device)
             #snap any out-of-bounds noisy value back to the nearest valid value
-            valid_noise = noise[noise < imax]
+            '''valid_noise = noise[noise < imax]
             valid_noise = valid_noise[valid_noise > imin]
             ## Way 2
             if valid_noise.size(0) != 0:
                 noise_max = torch.max(valid_noise).item()
                 noise[noise > noise_max] = noise_max
                 noise_min = torch.min(valid_noise).item()
-                noise[noise < noise_min] = noise_min
+                noise[noise < noise_min] = noise_min'''
 
             obfuscated_input = identity_input + noise ##Adding the noise values to ther features
 
