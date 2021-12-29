@@ -137,7 +137,7 @@ dmypy.json
 /results
 /weights
 /projects
-#/differential_privacy_library
+/differential_privacy_library
 best.jpg
 last.jpg
 single.yaml
