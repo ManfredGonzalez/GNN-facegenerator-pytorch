@@ -11,7 +11,9 @@ import torch.optim as optim
 from dataset import RaFDDataset
 import numpy as np
 import math
-from diffprivlib.mechanisms.laplace import LaplaceTruncated
+import sys
+sys.path.append("differential_privacy_library/")
+from differential_privacy_library.diffprivlib.mechanisms.laplace import LaplaceTruncated
 
 def get_paddingSizes(x, layer):
     #supposing that the feature map has the shape (batch_size,channels,height,width)
