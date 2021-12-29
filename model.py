@@ -126,20 +126,18 @@ class Model(nn.Module):
 
             scale_parameter = (((n*(imax-imin))/self.epsilon))
             location = torch.mean(identity_input,1,keepdim=True)
-            #noise = torch.from_numpy(np.random.laplace(loc=location,scale=scale_parameter, size=(identity_input.size(dim=0), n)))
+            noise = torch.from_numpy(np.random.laplace(loc=location.cpu().detach().numpy(),scale=scale_parameter.cpu().detach().numpy(), size=(identity_input.size(dim=0), n)))
 
-            noise = torch.exp(-abs(identity_input-location)/scale_parameter)/(2.*scale_parameter)
+            #noise = torch.exp(-abs(identity_input-location)/scale_parameter)/(2.*scale_parameter)
 
             noise = noise.to(identity_input.device)
             #snap any out-of-bounds noisy value back to the nearest valid value
-            '''valid_noise = noise[:,noise < imax]
-            valid_noise = valid_noise[:,valid_noise > imin]
-            ## Way 2
-            if valid_noise.size(0) != 0:
-                noise_max = torch.max(valid_noise).item()
-                noise[noise > noise_max] = noise_max
-                noise_min = torch.min(valid_noise).item()
-                noise[noise < noise_min] = noise_min'''
+            #num_max = noise[noise > imax]
+            #num_min = noise[noise < imin]
+            noise_max = torch.max(torch.where(noise < imax, noise, 0.),1,keepdim=True).values
+            noise_min = torch.min(torch.where(noise > imin, noise, 0.),1,keepdim=True).values
+            noise = torch.where(noise > imax, noise,noise_max)
+            noise = torch.where(noise < imin, noise,noise_min)
 
             obfuscated_input = identity_input + noise ##Adding the noise values to ther features
 
