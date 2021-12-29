@@ -20,19 +20,6 @@ def get_paddingSizes(x, layer):
     width = int((((x.shape[3]-1)-(x.shape[3]-layer.kernel_size[0]))*(1 / layer.stride[0]))/2)
     height = int((((x.shape[2]-1)-(x.shape[2]-layer.kernel_size[0]))*(1 / layer.stride[0]))/2)
     return height, width
-def snap_values(noise,epsilon,sensitivity,lower,upper):
-    '''noise = noise.detach().numpy()
-    sensitivity = sensitivity.detach().numpy()
-    lower = lower.cpu().detach().numpy()
-    upper = upper.cpu().detach().numpy()'''
-    for i in range(noise.size(dim=0)):
-        #512 values
-        for j in range(noise.size(dim=1)):
-            if noise[i,j] > upper[i,0] or noise[i,j] < lower[i,0]:
-                laplace = LaplaceTruncated(epsilon=epsilon,sensitivity=sensitivity[i,0].item(),lower=lower[i,0].item(),upper=upper[i,0].item())
-                noise[i,j] = laplace.randomise(noise[i,j].item())
-        
-    return noise
 
 class Model(nn.Module):
     def __init__(self,epsilon=0):
@@ -153,15 +140,16 @@ class Model(nn.Module):
 
             noise = torch.from_numpy(np.random.laplace(loc=location.cpu().detach().numpy(),scale=scale_parameter.cpu().detach().numpy(), size=(identity_input.size(dim=0), n)))
             noise = noise.to(identity_input.device)
-            noise = snap_values(noise,self.epsilon,sensitivity,imin,imax)
+            
+            #noise = snap_values(noise,self.epsilon,sensitivity,imin,imax)
             #noise = torch.exp(-abs(identity_input-location)/scale_parameter)/(2.*scale_parameter)
             
             
 
             #snap any out-of-bounds noisy value back to the nearest valid value
-            #num_max = noise[noise > imax]
-            #num_min = noise[noise < imin]
-            '''noise_max = torch.max(torch.where(noise < imax, noise, 0.),1,keepdim=True).values
+            '''num_max = noise[noise > imax]
+            num_min = noise[noise < imin]
+            noise_max = torch.max(torch.where(noise < imax, noise, 0.),1,keepdim=True).values
             noise_min = torch.min(torch.where(noise > imin, noise, 0.),1,keepdim=True).values
             noise = torch.where(noise > imax, noise,noise_max)
             noise = torch.where(noise < imin, noise,noise_min)'''
