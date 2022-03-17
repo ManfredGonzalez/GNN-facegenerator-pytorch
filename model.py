@@ -147,8 +147,9 @@ class Model(nn.Module):
             
 
             #snap any out-of-bounds noisy value back to the nearest valid value
-            '''num_max = noise[noise > imax]
+            num_max = noise[noise > imax]
             num_min = noise[noise < imin]
+            '''
             noise_max = torch.max(torch.where(noise < imax, noise, 0.),1,keepdim=True).values
             noise_min = torch.min(torch.where(noise > imin, noise, 0.),1,keepdim=True).values
             noise = torch.where(noise > imax, noise,noise_max)
